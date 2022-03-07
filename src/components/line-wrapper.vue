@@ -97,7 +97,7 @@ export default {
   },
   methods: {
     toggleCollapse() {
-      if (this.sectionName) {
+      if (this.sectionStart && this.sectionName) {
         EventBus.$emit(
           'toggleLogViewerCollapse',
           this.sectionName,
