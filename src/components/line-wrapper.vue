@@ -1,19 +1,40 @@
 <template>
-  <div class="line-wrapper" :style="customStyle">
+  <div
+    class="line-wrapper"
+    :class="{'section-start': sectionStart}"
+    :style="customStyle"
+    @click="toggleCollapse"
+    v-if="!collapse || sectionStart"
+  >
+    <line-icon
+      v-if="sectionStart"
+      :name="collapse ? 'arrow-right' : 'arrow-down'"
+    ></line-icon>
     <line-number v-if="hasNumber" v-bind="numberData"></line-number>
     <slot>
       <line-content :content="data"></line-content>
     </slot>
+    <line-time v-if="sectionStart" v-bind="timeData"></line-time>
   </div>
 </template>
 <script>
 import LineContent from './line-content.vue'
 import LineNumber from './line-number.vue'
+import LineTime from './line-time.vue'
+import LineIcon from './line-icon.vue'
+import {EventBus} from '../utils/event-bus'
 export default {
   name: 'LineWrapper',
   components: {
     LineContent,
-    LineNumber
+    LineNumber,
+    LineTime,
+    LineIcon
+  },
+  data() {
+    return {
+      collapse: false
+    }
   },
   props: {
     /**
@@ -29,6 +50,14 @@ export default {
         ]
       }
     },
+    sectionStart: {
+      type: Boolean,
+      default: false
+    },
+    sectionName: {
+      type: String,
+      default: ''
+    },
     /**
      * the line height
      */
@@ -43,7 +72,8 @@ export default {
       }
     },
     hasNumber: Boolean,
-    numberData: Object
+    numberData: Object,
+    timeData: Object
   },
   computed: {
     customStyle() {
@@ -57,6 +87,25 @@ export default {
         this.comStyle
       )
     }
+  },
+  mounted() {
+    EventBus.$on('toggleLogViewerCollapse', (emitName, emitCollapse) => {
+      if (!this.sectionStart && this.sectionName === emitName) {
+        this.collapse = emitCollapse
+      }
+    })
+  },
+  methods: {
+    toggleCollapse() {
+      if (this.sectionName) {
+        EventBus.$emit(
+          'toggleLogViewerCollapse',
+          this.sectionName,
+          !this.collapse
+        )
+        this.collapse = !this.collapse
+      }
+    }
   }
 }
 </script>
@@ -69,14 +118,14 @@ export default {
   white-space: pre;
   // word-break: break-all;
   box-sizing: border-box;
-  padding-left: 16px;
+  padding-left: 28px;
 
   &:hover {
     background-color: #444;
   }
 
   .line-number {
-    min-width: 40px;
+    min-width: 30px;
     text-align: right;
     color: #666;
     padding-right: 10px;
@@ -84,6 +133,25 @@ export default {
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+  }
+
+  &.section-start {
+    padding-left: 8px;
+    cursor: pointer;
+
+    .line-content {
+      flex: 1;
+    }
+
+    .line-time {
+      color: #fff;
+      background: #999;
+      margin-left: 8px;
+      margin-right: 8px;
+      border-radius: 4px;
+      padding-left: 8px;
+      padding-right: 8px;
+    }
   }
 }
 </style>

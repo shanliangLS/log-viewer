@@ -126,11 +126,17 @@ export default {
     //
     getLineWrapperProps(index) {
       const height = this.rowHeight
+      const indexLine = this.lines[index]
       const props = {
         height,
         hasNumber: this.hasNumber,
         numberData: {
           number: index + 1
+        },
+        sectionStart: indexLine.sectionStart,
+        sectionName: indexLine.sectionName,
+        timeData: {
+          sec: indexLine.sectionTime
         }
       }
       this.lineWrapperStyle &&
@@ -143,7 +149,7 @@ export default {
           }
         }
       }
-      props.data = this.lines[index]
+      props.data = indexLine.content
       return {
         props
       }
